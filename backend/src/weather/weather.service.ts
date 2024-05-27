@@ -1,10 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import * as constant from '../common/constant';
-import { CoordinatesDTO } from './coordinates.dto';
+import {
+  GetCurrent,
+  TemperaturePerception,
+  TemperatureThreshold,
+} from './weather.type';
 
 @Injectable()
 export class WeatherService {
@@ -15,27 +19,38 @@ export class WeatherService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.weatherApiKey = this.configService.get<string>('WEATHER_API_KEY');
+    this.weatherApiKey = this.configService.get<string>(
+      'WEATHER_API_KEY',
+    ) as string;
   }
 
-  async getCurrent(coordinates: CoordinatesDTO): Promise<AxiosResponse<any>> {
+  getCurrent: GetCurrent = async (coordinates) => {
     const { data } = await firstValueFrom(
       this.httpService
         .get(
-          `${constant.weatherEndpoint}?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.weatherApiKey}`,
+          `${constant.weatherEndpoint}?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.weatherApiKey}&units=imperial`,
         )
         .pipe(
           catchError((err: AxiosError) => {
-            this.logger.error(err.response.data);
+            this.logger.error(err?.response?.data as any);
             throw 'An error occured!';
           }),
         ),
     );
 
-    return data;
-  }
+    let feelsLike = TemperaturePerception.MODERATE;
+    if (data.main.feels_like > TemperatureThreshold.HOT) {
+      feelsLike = TemperaturePerception.HOT;
+    } else if (data.main.feels_like < TemperatureThreshold.COLD) {
+      feelsLike = TemperaturePerception.COLD;
+    }
 
-  getHello(): string {
-    return 'Hello!';
-  }
+    const res = {
+      condition: data.weather[0].main,
+      feels_like: feelsLike,
+      temperature: `${data.main.temp} °F`,
+    };
+
+    return res;
+  };
 }

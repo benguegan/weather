@@ -1,7 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CoordinatesDTO } from './coordinates.dto';
 import { WeatherService } from './weather.service';
+import { WeatherRO } from './weather.type';
+import { CoordinatesDTO } from './coordinates.dto';
 
 @ApiTags('weather')
 @Controller('weather')
@@ -10,7 +11,7 @@ export class WeatherController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getCurrentWeather(@Query() coordinates: CoordinatesDTO): Promise<any> {
+  async getCurrent(@Query() coordinates: CoordinatesDTO): Promise<WeatherRO> {
     return this.weatherService.getCurrent(coordinates);
   }
 }
