@@ -2,8 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
-declare const module: any;
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -25,10 +23,5 @@ async function bootstrap() {
   console.info(`Application is running on: ${await app.getUrl()}`);
   console.info(`Web API is found at: ${await app.getUrl()}/api/v1`);
   console.info(`Documentation is found at: ${await app.getUrl()}/api/docs/v1`);
-
-  if (module.hot) {
-    module.hot.accept();
-    module.hot.dispose(() => app.close());
-  }
 }
 bootstrap().catch((e) => console.log(e));

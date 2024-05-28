@@ -8,6 +8,7 @@ import {
   GetCurrent,
   TemperaturePerception,
   TemperatureThreshold,
+  WeatherRO,
 } from './weather.type';
 
 @Injectable()
@@ -45,7 +46,7 @@ export class WeatherService {
       feelsLike = TemperaturePerception.COLD;
     }
 
-    const res = {
+    const res: WeatherRO = {
       condition: data.weather[0].main,
       feels_like: feelsLike,
       temperature: `${data.main.temp} °F`,
